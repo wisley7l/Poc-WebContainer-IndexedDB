@@ -1,0 +1,30 @@
+{
+  "name": "poc-webcontainer-indexeddb",
+  "version": "1.0.0",
+  "description": "WebContainer server from Git repository source stored with IndexedDB",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wisley7l/Poc-WebContainer-IndexedDB.git"
+  },
+  "keywords": [
+    "webcontainer",
+    "indexedDB"
+  ],
+  "author": "wisley7l",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/wisley7l/Poc-WebContainer-IndexedDB/issues"
+  },
+  "homepage": "https://github.com/wisley7l/Poc-WebContainer-IndexedDB#readme",
+  "devDependencies": {
+    "@commitlint/cli": "^17.8.1",
+    "@commitlint/config-conventional": "^17.8.1",
+    "husky": "^8.0.3",
+    "standard": "^17.1.0",
+    "standard-version": "^9.3.2"
+  }
+}
