@@ -1,13 +1,15 @@
 import './style.css'
-import { WebContainer } from '../webcontainers-frist-test/node_modules/@webcontainer/api/dist'
-import { files } from './files';
+import { WebContainer } from './webcontainers-frist-test/node_modules/@webcontainer/api/dist'
+import { files } from './files'
 import { database, add, get } from './database.js'
 
 // WEBCONTAINER ****
-/** @type {import('../webcontainers-frist-test/node_modules/@webcontainer/api/dist').WebContainer}  */
+/** @type {import('./webcontainers-frist-test/node_modules/@webcontainer/api/dist').WebContainer}  */
 let webcontainerInstance
 
 /** @param {string} content */
+
+const repoName = `${import.meta.env.VITE_GH_OWNER}-${import.meta.env.VITE_GH_REPO}`
 
 if (!('indexedDB' in window)) {
   console.log("This browser doesn't support IndexedDB");
@@ -32,7 +34,7 @@ const execCmd = async (command, options, debbug) => {
   }
   console.log(`${command} ${options && JSON.stringify(options)} success`)
 }
-const repoName = `${import.meta.env.VITE_GH_OWNER}-${import.meta.env.VITE_GH_REPO}`
+
 const initWebContainer = async () => {
   console.log('>> WebContaner')
   webcontainerInstance = await WebContainer.boot()
@@ -44,7 +46,7 @@ const initWebContainer = async () => {
 window.addEventListener('load', async () => {
   const db = await database
   await initWebContainer()
-  let img = await get(db, 'images', `./${repoName}/assets/images/logowhite-e-com.png`)
+  const img = await get(db, 'images', `./${repoName}/assets/images/logowhite-e-com.png`)
 
   // await execCmd('ls', ['-la'], true)
 
