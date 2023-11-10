@@ -1,47 +1,84 @@
 import './style.css'
 import { WebContainer } from '../webcontainers-frist-test/node_modules/@webcontainer/api/dist'
 import { files } from './files';
+import { database, add, get } from './database.js'
 
+// WEBCONTAINER ****
 /** @type {import('../webcontainers-frist-test/node_modules/@webcontainer/api/dist').WebContainer}  */
 let webcontainerInstance
 
 /** @param {string} content */
 
-const execCommand = async (command, options) => {
+if (!('indexedDB' in window)) {
+  console.log("This browser doesn't support IndexedDB");
+}
+
+const commandExec = async (command, options, debbug) => {
   const cmd = await webcontainerInstance.spawn(command, options)
   cmd.output.pipeTo(new WritableStream({
     write(data) {
-      console.log('>', data)
+      if (debbug) {
+        console.log(':', data)
+      }
     }
   }))
-
   return cmd.exit
 }
 
-const execCmd = async (command, options) => {
-  const exitCode = await execCommand(command, options)
+const execCmd = async (command, options, debbug) => {
+  const exitCode = await commandExec(command, options, debbug)
   if (exitCode !== 0) {
     throw new Error(`${command} failed`)
-  };
+  }
+  console.log(`${command} ${options && JSON.stringify(options)} success`)
+}
+const repoName = `${import.meta.env.VITE_GH_OWNER}-${import.meta.env.VITE_GH_REPO}`
+const initWebContainer = async () => {
+  console.log('>> WebContaner')
+  webcontainerInstance = await WebContainer.boot()
+  await webcontainerInstance.mount(files)
+  await execCmd('npm', ['install'])
+  await execCmd('npm', ['run', 'setup'])
 }
 
 window.addEventListener('load', async () => {
-  // textareaEl.value = files['index.js'].file.contents
+  const db = await database
+  await initWebContainer()
+  let img = await get(db, 'images', `./${repoName}/assets/images/logowhite-e-com.png`)
+
+  // await execCmd('ls', ['-la'], true)
+
+  // console.log('>img ', img)
+  if (img) {
+    iframeEl.src = `data:image/png;base64,${img.data}`
+  }
 
   // Call only once
-  webcontainerInstance = await WebContainer.boot()
-  await webcontainerInstance.mount(files);
+  if (!img) {
+    console.log('>> Get Repo')
+    const dirs = await webcontainerInstance.fs.readdir('./')
+    const dirName = dirs.find(dir => dir.startsWith(`${repoName}`))
 
-  await execCmd('npm', ['install'])
-  console.log('>> OK')
-  await execCmd('npm', ['run', 'start'])
-  console.log('>> exec')
-  await execCmd('ls', ['', '-la'])
-  console.log('>> end')
-  const image = await webcontainerInstance.fs.readFile('Design sem nome.png.json', 'utf-8');
-  const imageJSON = JSON.parse(image)
-  console.log(imageJSON);
-  iframeEl.src = `data:image/${imageJSON.typeFile};${imageJSON.encoding},${imageJSON.content}`;
+    const dirsAssets = (await webcontainerInstance.fs.readdir(`./${dirName}/assets/`)).map(dir => {
+      // disregard files
+      if (!dir.includes('.')) {
+        return dir
+      }
+    })
+
+    dirsAssets.forEach(async (dir) => {
+      // console.log('>>dir ', dir)
+      const files = await webcontainerInstance.fs.readdir(`./${dirName}/assets/${dir}`)
+      // console.log('files: ', files)
+      files.forEach(async (fileName) => {
+        const path = `./${repoName}/assets/${dir}/${fileName}`
+        const file = await webcontainerInstance.fs.readFile(`./${dirName}/assets/${dir}/${fileName}`, 'base64')
+        // console.log('>> ', file)
+        const obj = { path, encoding: 'base64', data: file, format: fileName.split('.')[1] }
+        add(db, dir, obj)
+      })
+    })
+  }
 })
 
 document.querySelector('#app').innerHTML = `
