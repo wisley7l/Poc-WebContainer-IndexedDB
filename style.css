@@ -26,7 +26,7 @@ textarea {
 }
 
 iframe {
-  height: 100%;
-  width: 100%;
-  border-radius: 0.5rem;
+  height: 1920px;
+  width: 1080px;
+  /* border-radius: 0.5rem; */
 }

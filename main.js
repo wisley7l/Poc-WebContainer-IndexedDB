@@ -1,7 +1,7 @@
 import './style.css'
-import { WebContainer } from './webcontainers-frist-test/node_modules/@webcontainer/api/dist'
+import { WebContainer } from './node_modules/@webcontainer/api/dist'
 import { files } from './files'
-import { database, add, get } from './database.js'
+// import { database, add, get } from './database.js'
 
 // WEBCONTAINER ****
 /** @type {import('./webcontainers-frist-test/node_modules/@webcontainer/api/dist').WebContainer}  */
@@ -9,10 +9,25 @@ let webcontainerInstance
 
 /** @param {string} content */
 
-const repoName = `${import.meta.env.VITE_GH_OWNER}-${import.meta.env.VITE_GH_REPO}`
+// const repoName = `${import.meta.env.VITE_GH_OWNER}-${import.meta.env.VITE_GH_REPO}`
 
 if (!('indexedDB' in window)) {
-  console.log("This browser doesn't support IndexedDB");
+  console.log("This browser doesn't support IndexedDB")
+}
+
+const startDevServer = async (src) => {
+  const opts = ['run', 'dev']
+  if (src) {
+    opts.unshift(src)
+    opts.unshift('--prefix')
+  }
+  await webcontainerInstance.spawn('npm', opts)
+
+  // Wait for `server-ready` event
+  webcontainerInstance.on('server-ready', (port, url) => {
+    // console.log('>> ', url, ' ', port)
+    iframeEl.src = url
+  })
 }
 
 const commandExec = async (command, options, debbug) => {
@@ -20,7 +35,7 @@ const commandExec = async (command, options, debbug) => {
   cmd.output.pipeTo(new WritableStream({
     write(data) {
       if (debbug) {
-        console.log(':', data)
+        console.log('>', data)
       }
     }
   }))
@@ -40,57 +55,24 @@ const initWebContainer = async () => {
   webcontainerInstance = await WebContainer.boot()
   await webcontainerInstance.mount(files)
   await execCmd('npm', ['install'])
-  await execCmd('npm', ['run', 'setup'])
+  await execCmd('npm', ['run', 'setup'], true)
 }
 
 window.addEventListener('load', async () => {
-  const db = await database
+  // const db = await database
   await initWebContainer()
-  const img = await get(db, 'images', `./${repoName}/assets/images/logowhite-e-com.png`)
 
+  // webcontainerInstance.directory
   // await execCmd('ls', ['-la'], true)
+  await execCmd('npm', ['--prefix', 'blog', 'i'], true)
 
-  // console.log('>img ', img)
-  if (img) {
-    iframeEl.src = `data:image/png;base64,${img.data}`
-  }
-
-  // Call only once
-  if (!img) {
-    console.log('>> Get Repo')
-    const dirs = await webcontainerInstance.fs.readdir('./')
-    const dirName = dirs.find(dir => dir.startsWith(`${repoName}`))
-
-    const dirsAssets = (await webcontainerInstance.fs.readdir(`./${dirName}/assets/`)).map(dir => {
-      // disregard files
-      if (!dir.includes('.')) {
-        return dir
-      }
-    })
-
-    dirsAssets.forEach(async (dir) => {
-      // console.log('>>dir ', dir)
-      const files = await webcontainerInstance.fs.readdir(`./${dirName}/assets/${dir}`)
-      // console.log('files: ', files)
-      files.forEach(async (fileName) => {
-        const path = `./${repoName}/assets/${dir}/${fileName}`
-        const file = await webcontainerInstance.fs.readFile(`./${dirName}/assets/${dir}/${fileName}`, 'base64')
-        // console.log('>> ', file)
-        const obj = { path, encoding: 'base64', data: file, format: fileName.split('.')[1] }
-        add(db, dir, obj)
-      })
-    })
-  }
+  await startDevServer('blog')
+  // await execCmd('ls', ['blog', '-la'], true)
 })
 
 document.querySelector('#app').innerHTML = `
-  <div class="container">
-    <!-- div class="editor">
-      <textarea>I am a textarea</textarea>
-    </div --!>
-    <div class="preview">
-      <iframe src="loading.html"></iframe>
-    </div>
+  <div class="">
+    <iframe src="loading.html"></iframe>
   </div>
 `
 

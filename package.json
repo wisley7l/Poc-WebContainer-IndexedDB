@@ -29,7 +29,6 @@
     "@commitlint/config-conventional": "^17.8.1",
     "husky": "^8.0.3",
     "standard": "^17.1.0",
-    "standard-version": "^9.3.2",
     "vite": "^4.4.5"
   }
 }
