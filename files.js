@@ -1,20 +1,31 @@
 /** @satisfies {import('@webcontainer/api').FileSystemTree} */
 
 export const files = {
-  'index.js': {
+  'git.js': {
     file: {
       contents: `
 import fs from 'fs'
 import unzipper from 'unzipper'
 
-console.log('TESTE')
+console.log('GIT')
 const fileString = fs.readFileSync('filezip.json')
 const fileBuffer = Buffer.from(JSON.parse(fileString))
 
 fs.writeFileSync('filezip.zip', fileBuffer)
 
+`,
+    },
+  },
+  'unzipper.js': {
+    file: {
+      contents: `
+import fs from 'fs'
+import unzipper from 'unzipper'
+
 fs.createReadStream('filezip.zip')
   .pipe(unzipper.Extract({ path: './blog' }))
+
+  console.log('Unzipper')
 `,
     },
   },
@@ -32,7 +43,8 @@ fs.createReadStream('filezip.zip')
   "license": "ISC",
   "scripts": {
     "start": "nodemon --watch './' index.js",
-    "setup": "node index.js"
+    "git": "node git.js",
+    "unzipper": "node unzipper.js"
   },
   "dependencies": {
     "octokit": "^3.1.1",

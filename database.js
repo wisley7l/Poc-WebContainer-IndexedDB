@@ -19,9 +19,7 @@ const database = new Promise((resolve, reject) => {
   dbPromise.onupgradeneeded = (event) => {
     db = event.target.result
 
-    const imagesStore = db.createObjectStore('images', { keyPath: 'path' })
-    const jsStore = db.createObjectStore('js', { keyPath: 'path' })
-    const cssStore = db.createObjectStore('css', { keyPath: 'path' })
+    db.createObjectStore('repo', { keyPath: 'name' })
     console.log('>> INDEXEDDB Updated')
     resolve(db)
   }
