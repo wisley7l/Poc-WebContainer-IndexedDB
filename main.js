@@ -85,7 +85,6 @@ window.addEventListener('load', async () => {
 
   // await execCmd('ls', ['-la'], true)
   const zip = await get(db, 'repo', 'blog')
-  let isRebeuild = false
   if (zip && zip.fileZip) {
     console.log('File exists IndexedDB')
     await webcontainerInstance.fs.writeFile('filezip.zip', zip.fileZip)

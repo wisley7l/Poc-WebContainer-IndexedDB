@@ -1,6 +1,7 @@
 {
   "name": "poc-webcontainer-indexeddb",
   "version": "1.0.0",
+  "private": true,
   "description": "WebContainer server from Git repository source stored with IndexedDB",
   "repository": {
     "type": "git",
