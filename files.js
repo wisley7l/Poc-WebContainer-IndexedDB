@@ -5,7 +5,6 @@ export const files = {
     file: {
       contents: `
 import fs from 'fs'
-import unzipper from 'unzipper'
 
 console.log('GIT')
 const fileString = fs.readFileSync('filezip.json')
@@ -19,13 +18,43 @@ fs.writeFileSync('filezip.zip', fileBuffer)
   'unzipper.js': {
     file: {
       contents: `
-import fs from 'fs'
-import unzipper from 'unzipper'
+import AdmZip from 'adm-zip';
 
-fs.createReadStream('filezip.zip')
-  .pipe(unzipper.Extract({ path: './blog' }))
+console.log('init unzipper')
+const unzipDirectory = async (inputFilePath, outputDirectory) => {
+  const zip = new AdmZip(inputFilePath);
+  return new Promise((resolve, reject) => {
+    zip.extractAllToAsync(outputDirectory, true, (error) => {
+      if (error) {
+        console.log(error);
+        reject(error);
+      } else {
+        console.log('Extracted to successfully');
+        resolve();
+      }
+    });
+  });
+};
 
-  console.log('Unzipper')
+await unzipDirectory('filezip.zip', 'blog')
+console.log('end unzipper')
+`,
+    },
+  },
+  'zipper.js': {
+    file: {
+      contents: `
+import AdmZip from 'adm-zip';
+console.log('init zipper')
+const zipDirectory = async (sourceDir, outputFilePath) => {
+  const zip = new AdmZip();
+  zip.addLocalFolder(sourceDir);
+  await zip.writeZipPromise(outputFilePath);
+  console.log('Zip file created:',outputFilePath);
+};
+
+await zipDirectory('./blog', './blog.zip')
+console.log('end zipper')
 `,
     },
   },
@@ -44,11 +73,12 @@ fs.createReadStream('filezip.zip')
   "scripts": {
     "start": "nodemon --watch './' index.js",
     "git": "node git.js",
-    "unzipper": "node unzipper.js"
+    "unzipper": "node unzipper.js",
+    "zipper": "node zipper.js"
   },
   "dependencies": {
     "octokit": "^3.1.1",
-    "unzipper": "^0.10.14"
+    "adm-zip": "^0.5.10"
   }
 }`,
     },

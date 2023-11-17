@@ -39,13 +39,22 @@ const execCmd = async (command, options, debbug) => {
   console.log(`${command} ${opts || ''} success`)
 }
 
-const startDevServer = async (src) => {
+const startDevServer = async (src, debug) => {
   const options = ['run', 'dev']
   if (src) {
     options.unshift(src)
     options.unshift('--prefix')
   }
-  await webcontainerInstance.spawn('npm', options)
+
+  console.log('>> Starting server')
+  const cmd = await webcontainerInstance.spawn('npm', options)
+  if (debug) {
+    cmd.output.pipeTo(new WritableStream({
+      write(data) {
+        console.log('>', data)
+      }
+    }))
+  }
 
   // Wait for `server-ready` event
   webcontainerInstance.on('server-ready', (port, url) => {
@@ -61,27 +70,37 @@ const initWebContainer = async () => {
   await execCmd('npm', ['install'])
 }
 
+const zipAndSave = async (db) => {
+  await execCmd('npm', ['run', 'zipper'], true)
+  // await execCmd('ls', ['-la'], true)
+  const fileZip = await webcontainerInstance.fs.readFile('./blog.zip')
+  // console.log(fileZip)
+  add(db, 'repo', { name: 'blog', fileZip })
+  // alert('Repo saved')
+}
+
 window.addEventListener('load', async () => {
   const db = await database
   await initWebContainer()
 
   // await execCmd('ls', ['-la'], true)
-  const zip = await get(db, 'repo', 'name')
+  const zip = await get(db, 'repo', 'blog')
+  let isRebeuild = false
   if (zip && zip.fileZip) {
     console.log('File exists IndexedDB')
     await webcontainerInstance.fs.writeFile('filezip.zip', zip.fileZip)
+    await execCmd('npm', ['run', 'unzipper'], true)
+    await execCmd('chmod', ['-R', '777', 'blog'])
+    await execCmd('npm', ['--prefix', 'blog', 'rebuild'])
   } else {
     console.log('Download Repository')
     await execCmd('npm', ['run', 'git'], true)
-    const fileZip = await webcontainerInstance.fs.readFile('filezip.zip')
-    console.log(fileZip)
-    add(db, 'repo', { name: 'name', fileZip })
+    await execCmd('npm', ['run', 'unzipper'], true)
+    // await execCmd('ls', ['-la'], true)
+    await execCmd('npm', ['--prefix', 'blog', 'i'])
+    zipAndSave(db)
   }
-  // await execCmd('ls', ['-la'], true)
-  await execCmd('npm', ['run', 'unzipper'])
-  await execCmd('ls')
 
-  await execCmd('npm', ['--prefix', 'blog', 'i'])
   await startDevServer('blog')
 })
 
