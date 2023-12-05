@@ -4,13 +4,35 @@ export const files = {
   'git.js': {
     file: {
       contents: `
-import fs from 'fs'
-
-console.log('GIT')
-const fileString = fs.readFileSync('filezip.json')
-const fileBuffer = Buffer.from(JSON.parse(fileString))
-
-fs.writeFileSync('filezip.zip', fileBuffer)
+      import axios from "axios";
+      import fs from 'fs'
+      
+      const downloadRepo = async () => {
+        try {
+          const { data } = await axios.get('https://ecomplus-app-test.web.app' + '/api//github-download', {
+            headers: {
+              Authorization: 'Bear ' + ${import.meta.VITE_ACCESS_TOKEN},
+              'x-store-id': 1173
+            }
+          })
+          return data
+        } catch (err) {
+          console.error(err)
+          return null;
+        }
+      }
+      
+      const createFile = async () => {
+      
+        console.log('GIT')
+        // const fileString = fs.readFileSync('filezip.json')
+        // const fileBuffer = Buffer.from(JSON.parse(fileString))
+      
+        const fileBuffer = await downloadRepo()
+        if (fileBuffer) fs.writeFileSync('filezip.zip', fileBuffer)
+      }
+      
+      createFile()
 
 `,
     },
@@ -78,7 +100,8 @@ console.log('end zipper')
   },
   "dependencies": {
     "octokit": "^3.1.1",
-    "adm-zip": "^0.5.10"
+    "adm-zip": "^0.5.10",
+    "axios": "^1.6.2"
   }
 }`,
     },

@@ -70,37 +70,37 @@ const initWebContainer = async () => {
   await execCmd('npm', ['install'])
 }
 
-const zipAndSave = async (db) => {
-  await execCmd('npm', ['run', 'zipper'], true)
-  // await execCmd('ls', ['-la'], true)
-  const fileZip = await webcontainerInstance.fs.readFile('./blog.zip')
-  // console.log(fileZip)
-  add(db, 'repo', { name: 'blog', fileZip })
-  // alert('Repo saved')
-}
+// const zipAndSave = async (db) => {
+//   await execCmd('npm', ['run', 'zipper'], true)
+//   // await execCmd('ls', ['-la'], true)
+//   const fileZip = await webcontainerInstance.fs.readFile('./blog.zip')
+//   // console.log(fileZip)
+//   add(db, 'repo', { name: 'blog', fileZip })
+//   // alert('Repo saved')
+// }
 
 window.addEventListener('load', async () => {
-  const db = await database
+  // const db = await database
   await initWebContainer()
 
   // await execCmd('ls', ['-la'], true)
-  const zip = await get(db, 'repo', 'blog')
-  if (zip && zip.fileZip) {
-    console.log('File exists IndexedDB')
-    await webcontainerInstance.fs.writeFile('filezip.zip', zip.fileZip)
-    await execCmd('npm', ['run', 'unzipper'], true)
-    await execCmd('chmod', ['-R', '777', 'blog'])
-    await execCmd('npm', ['--prefix', 'blog', 'rebuild'])
-  } else {
-    console.log('Download Repository')
-    await execCmd('npm', ['run', 'git'], true)
-    await execCmd('npm', ['run', 'unzipper'], true)
-    // await execCmd('ls', ['-la'], true)
-    await execCmd('npm', ['--prefix', 'blog', 'i'])
-    zipAndSave(db)
-  }
+  // const zip = await get(db, 'repo', 'blog')
+  // if (zip && zip.fileZip) {
+  //   console.log('File exists IndexedDB')
+  //   await webcontainerInstance.fs.writeFile('filezip.zip', zip.fileZip)
+  //   await execCmd('npm', ['run', 'unzipper'], true)
+  //   await execCmd('chmod', ['-R', '777', 'blog'])
+  //   await execCmd('npm', ['--prefix', 'blog', 'rebuild'])
+  // } else {
+  //   console.log('Download Repository')
+  await execCmd('npm', ['run', 'git'], true)
+  await execCmd('npm', ['run', 'unzipper'], true)
+  await execCmd('ls', ['-la'], true)
+  //   await execCmd('npm', ['--prefix', 'blog', 'i'])
+  //   zipAndSave(db)
+  // }
 
-  await startDevServer('blog')
+  // await startDevServer('blog')
 })
 
 document.querySelector('#app').innerHTML = `
