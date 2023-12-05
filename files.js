@@ -9,7 +9,7 @@ export const files = {
       
       const downloadRepo = async () => {
         try {
-          const { data } = await axios.get('https://ecomplus-app-test.web.app' + '/api//github-download', {
+          const { data } = await axios.get('https://ecomplus-app-test.web.app' + '/api/github-download', {
             headers: {
               Authorization: 'Bear ' + ${import.meta.VITE_ACCESS_TOKEN},
               'x-store-id': 1173
